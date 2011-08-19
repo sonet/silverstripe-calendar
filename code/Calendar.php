@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Monthly Calendar Page type that lets users manage Events in the CMS.
+ * Calendar Page type with month view with event management in the CMS
  * 
  * @todo Navigation to be added
  * @todo Event management in CMS
@@ -25,7 +25,8 @@ class Calendar extends Page {
 			'Event',
 			array(
 				'Date' => 'Date',
-				'Location'=>'Location'
+				'Location'=>'Location',
+				'Link' => 'Link'
 			),
 			'getCMSFields_forPopup'
 		));
@@ -35,19 +36,23 @@ class Calendar extends Page {
 	static $year;
 	static $month;
 	static $day;
+	
+	/**
+	 * Initialize month view
+	 *
+	 * @return void
+	 */
+	static function calInit() {
 
-	static function monthInit() {
-		
 		// get month offset from session
-		$_SESSION['m'] = (isset($_SESSION['m'])) ? $_SESSION['m'] : 0;
-		// get URL offset param
-		if(!isset($_GET['m']) || !is_numeric($_GET['m']))
-			$_GET['m'] = 0;
-		$_SESSION['m'] += $_GET['m'];
-		$o = $_SESSION['m'];
-		
+		$_SESSION['month'] = (isset($_SESSION['month'])) ? $_SESSION['month'] : 0;
+		// get offset URL param
+		if(!isset($_GET['month']) || !is_numeric($_GET['month']))
+			$_GET['month'] = 0;
+		$_SESSION['m'] += $_GET['month'];
+		$o = $_SESSION['month'];
+		// add or subtract month offset
 		$date = new DateTime(date('Y-m-d'));
-
 		switch ($o) {
 			case ($o > 0):
 				$date->add(new DateInterval('P' . abs($o) . 'M'));
@@ -62,6 +67,7 @@ class Calendar extends Page {
 		self::$year = $date->format('Y');
 		self::$month = $date->format('n');
 		self::$day = $date->format('j');
+		
 	}
 
 	/**
@@ -113,8 +119,8 @@ class Calendar extends Page {
 	}
 
 }
-
-Calendar::monthInit();
+// @todo Move calendar init into the controller
+Calendar::calInit();
 
 class Calendar_Controller extends Page_Controller {
 
@@ -123,7 +129,7 @@ class Calendar_Controller extends Page_Controller {
 
 		Requirements::css('calendar/css/calendar.css');
 		// @todo Move model init call into controller's init(), pass request date (month) as argument
-		// @todo Have all event for the particular month available in here?
+		// @todo Have all event for the particular month available in here
 	}
 
 	function CurrentMonth() {
@@ -165,48 +171,23 @@ class Calendar_Controller extends Page_Controller {
 				array(
 					'Day' => $dayValue,
 					'OddEven' => $oddEven,
-					'Events' => '' //$this->Events($dayIndex)
-					)//$this->Events($dayIndex) // not good idea to get all events by one
+					'Events' => $this->Events($dayIndex)
+					) // not good idea to get events individually one by one
 				)
 			);
 		}
 		return $daysSet;
 	}
-		
-	function Events($dayIndex) {
-		// @todo Store all event for month somewhere - init()? Push event for the particular day only
-		$eventSet = new DataObjectSet();
-		$eventSet->push(new ArrayData(
-			array(
-				'Event' => 'Event info'
-			)
-		));
-		return $eventSet;
-	}
 
-	/**
-	 * Get current month offset based on user selection
-	 *
-	 * @return integer
-	 */
-	protected function getMonthSelection() {
-		if (isset($_SESSION['month']))
-			return $_SESSION['month'];
-		else
-			return 0;
+	function Events($dayIndex) {
+		// @todo Store all event for month somewhere - init()?
+		//  Push event for the particular day only
+		//$eventSet->push(new ArrayData(
+		//	array(
+		//		'Event' => 'Event info'
+		//	)
+		//));
+		return DataObject::get('Events', "Date = '$day'");
 	}
 
 }
-
-
-//	function Events($day) {
-//
-//	if(!in_array($region, self::$regionStrings)) 
-//		return false; 
-//
-//	return DataObject::get('Events', "Date = '$day'"); 
-//	}
-
-
-//http://silverstripe.org/template-questions/show/8518
-//echo "<pre>"; print_r($daysSet); echo "\n</pre>";

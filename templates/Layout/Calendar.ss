@@ -5,15 +5,11 @@
 <% include SideContent %>
 			</div>
 			 <div class="g9r typography">
-
 				<div id="Breadcrumbs" class="gr9">
 					<p><a href="/">Home</a> » $Breadcrumbs</p>
 				</div>
 <% include TitleBackground %>
 				$Content
-
-
-
 				<table class="calendar">
 					<tr>
 						<th colspan="7">$CurrentMonth</th>
@@ -43,9 +39,6 @@
 						<% end_control %>
 					</tr>
 				</table>
-
-				
-
 			</div>
 		</div>
 		<br class="c" />
