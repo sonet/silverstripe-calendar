@@ -49,7 +49,7 @@ class Calendar extends Page {
 		// get offset URL param
 		if(!isset($_GET['month']) || !is_numeric($_GET['month']))
 			$_GET['month'] = 0;
-		$_SESSION['m'] += $_GET['month'];
+		$_SESSION['month'] += $_GET['month'];
 		$o = $_SESSION['month'];
 		// add or subtract month offset
 		$date = new DateTime(date('Y-m-d'));
@@ -67,7 +67,6 @@ class Calendar extends Page {
 		self::$year = $date->format('Y');
 		self::$month = $date->format('n');
 		self::$day = $date->format('j');
-		
 	}
 
 	/**
@@ -120,7 +119,7 @@ class Calendar extends Page {
 
 }
 // @todo Move calendar init into the controller
-Calendar::calInit();
+
 
 class Calendar_Controller extends Page_Controller {
 
@@ -128,6 +127,7 @@ class Calendar_Controller extends Page_Controller {
 		parent::init();
 
 		Requirements::css('calendar/css/calendar.css');
+		$this->calInit();
 		// @todo Move model init call into controller's init(), pass request date (month) as argument
 		// @todo Have all event for the particular month available in here
 	}
@@ -187,7 +187,7 @@ class Calendar_Controller extends Page_Controller {
 		//		'Event' => 'Event info'
 		//	)
 		//));
-		return DataObject::get('Events', "Date = '$day'");
+		return '';//DataObject::get('Events', "Date = '$dayIndex'");
 	}
 
 }
