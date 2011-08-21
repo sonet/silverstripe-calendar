@@ -3,10 +3,8 @@
 /**
  * Calendar Page type with month view with event management in the CMS
  * 
- * @todo Navigation to be added
- * @todo Modify events class to DataObjectDecorator/loosely coupled
- * @todo Modify template files to work with the default theme
- *
+ * @todo Transform event class to DataObjectDecorator (loosely coupled)
+ * @author Adam Skrzypulec
  * @package calendar
  */
 
@@ -200,6 +198,37 @@ class Calendar extends Page {
 			}
 		}
 		return $eventSet;
+	}
+	
+	/**
+	 * Add default records to database.
+	 */
+	function requireDefaultRecords() { 
+		parent::requireDefaultRecords();
+		$this->calendarInit(0);
+
+		if(!SiteTree::get_by_link('calendar')) { 
+			$calendar = new Calendar(); 
+			$calendar->Title = _t('SiteTree.DEFAULTCALENDARTITLE', 'Calendar');
+			$calendar->MenuTitle = $calendar->Title; 
+			$calendar->Content = _t('SiteTree.DEFAULTCALENDARCONTENT', '<p>You can add/edit/delete your own all-day events in this calendar.</p>');
+			$calendar->Status = 'Published'; 
+			$calendar->write(); 
+			$calendar->publish('Stage', 'Live'); 
+			$calendar->flushCache(); 
+			DB::alteration_message('Calendar page created', 'created');
+
+			$event = new Event();
+			$event->EventName = _t('SiteTree.DEFAULTEVENTTITLE', 'Calendar Installation');
+			$event->EventDate = (
+				$this->year . '-' .
+				$this->month . '-' .
+				$this->day
+			);
+			$event->write();
+			$event->flushCache();
+			DB::alteration_message('Event object created', 'created');
+		}
 	}
 
 }

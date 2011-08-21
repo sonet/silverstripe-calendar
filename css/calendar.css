@@ -1,4 +1,4 @@
-.typography table.calendar {
+.typography .calendar {
 	width: 100%;
 	border-collapse: separate;
 	table-layout: fixed;
@@ -11,14 +11,14 @@
 	font-size:1em;
 	color: #8e8f92;
 	background: #e3e5e9;
-	padding: 4px;
+	padding: 7px;
 	border:0 none;
 }
 
 .typography .calendar td {
 	color: #a9aaac;
 	width: 14%;
-	height:8em;
+	height:9em;
 	vertical-align: top;
 	padding:.1em .4em;
 	line-height: 1.5em;
@@ -35,7 +35,6 @@
 .typography .calendar td.even {
 	background: #fff;
 }
-
 
 .typography .calendar .holiday {
 }
