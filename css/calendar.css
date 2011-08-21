@@ -18,7 +18,7 @@
 .typography .calendar td {
 	color: #a9aaac;
 	width: 14%;
-	height:9em;
+	height:8.5em;
 	vertical-align: top;
 	padding:.1em .4em;
 	line-height: 1.5em;
@@ -40,7 +40,7 @@
 }
 
 .typography .calendar .event {
-	background-color: #97c9f9;
+	background-color: #5BB0E4;
 	color: #fff;
 	text-align:left;
 	margin: 3px 0;
@@ -49,4 +49,8 @@
 	border-radius: 3px;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
+}
+
+.typography .calendar .event a {
+	color:#fff;
 }

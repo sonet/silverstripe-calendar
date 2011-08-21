@@ -5,21 +5,19 @@ class Event extends DataObject {
 	public static $db = array(
 		'EventName' => 'Text',
 		'EventDate' => 'Date',
-		'Location' => 'Text',
-		'Link' => 'Text'
+		'EventLink' => 'Text'
 	);
 
 	function getCMSFields_forPopup() {
 
-		$dateField = new DateField('EventDate', 'Event Date');
+		$dateField = new DateField('EventDate', _t('Event.EVENTDATE', 'Event Date'));
 		$dateField->setLocale('en_US');
 		$dateField->setConfig('showcalendar', true);
 
 		$fields = new FieldSet();
-		$fields->push(new TextField('EventName', 'Event Name'));
+		$fields->push(new TextField('EventName', _t('Event.EVENTNAME', 'Event Name')));
 		$fields->push($dateField);
-		$fields->push(new TextField('Location', 'Event Location'));
-		$fields->push(new TextField('Link', 'Event Link URL'));
+		$fields->push(new TextField('EventLink', _t('Event.EVENTLINK', 'Event Link URL (optional)')));
 
 		return $fields;
 	}

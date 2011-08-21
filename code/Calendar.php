@@ -4,7 +4,6 @@
  * Calendar Page type with month view with event management in the CMS
  * 
  * @todo Transform event class to DataObjectDecorator (loosely coupled)
- * @author Adam Skrzypulec
  * @package calendar
  */
 
@@ -19,7 +18,7 @@ class Calendar extends Page {
 	protected $events;
 
 	static $has_many = array ( 
-		'Events' => 'Event'
+		'CalendarEvents' => 'CalendarEvent'
 	);
 
 	public function getCMSFields($cms)
@@ -32,8 +31,7 @@ class Calendar extends Page {
 			array(
 				'EventName' => 'EventName',
 				'EventDate' => 'EventDate',
-				'Location'=> 'Location',
-				'Link' => 'Link'
+				'EventLink' => 'EventLink'
 			),
 			'getCMSFields_forPopup'
 		));
@@ -190,7 +188,8 @@ class Calendar extends Page {
 					if ($event->EventDate == $date->format('Y-m-d')) {
 						$eventSet->push(new ArrayData(
 							array(
-								'Event' => $event->EventName
+								'Event' => $event->EventName,
+								'Link' => $event->EventLink
 							)
 						));
 					}
@@ -225,6 +224,7 @@ class Calendar extends Page {
 				$this->month . '-' .
 				$this->day
 			);
+			$event->EventLink = 'https://github.com/sonet/silverstripe-calendar';
 			$event->write();
 			$event->flushCache();
 			DB::alteration_message('Event object created', 'created');
