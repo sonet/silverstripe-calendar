@@ -12,6 +12,15 @@
 
 class Calendar extends Page {
 	
+	protected $year;
+	protected $month;
+	protected $day;
+	
+	/**
+	 * @var DataObjectSet storing all events for the month
+	 */
+	protected $events;
+
 	static $has_many = array ( 
 		'Events' => 'Event'
 	);
@@ -24,8 +33,9 @@ class Calendar extends Page {
 			'Events',
 			'Event',
 			array(
-				'Date' => 'Date',
-				'Location'=>'Location',
+				'EventName' => 'EventName',
+				'EventDate' => 'EventDate',
+				'Location'=> 'Location',
 				'Link' => 'Link'
 			),
 			'getCMSFields_forPopup'
@@ -33,24 +43,13 @@ class Calendar extends Page {
 		return $fields;
 	}
 
-	static $year;
-	static $month;
-	static $day;
-	
 	/**
 	 * Initialize month view
 	 *
 	 * @return void
 	 */
-	static function calInit() {
+	protected function calendarInit($o) {
 
-		// get month offset from session
-		$_SESSION['month'] = (isset($_SESSION['month'])) ? $_SESSION['month'] : 0;
-		// get offset URL param
-		if(!isset($_GET['month']) || !is_numeric($_GET['month']))
-			$_GET['month'] = 0;
-		$_SESSION['month'] += $_GET['month'];
-		$o = $_SESSION['month'];
 		// add or subtract month offset
 		$date = new DateTime(date('Y-m-d'));
 		switch ($o) {
@@ -63,10 +62,12 @@ class Calendar extends Page {
 			default:
 				break;
 		}
-		// init current date
-		self::$year = $date->format('Y');
-		self::$month = $date->format('n');
-		self::$day = $date->format('j');
+
+		$this->year = $date->format('Y');
+		$this->month = $date->format('n');
+		$this->day = $date->format('j');
+
+		$this->getAllEvents();
 	}
 
 	/**
@@ -74,8 +75,8 @@ class Calendar extends Page {
 	 *
 	 * @return integer
 	 */
-	protected static function getDaysInMonth() {
-		return date('t', mktime(0, 0, 0, self::$month, 1, self::$year));
+	protected function getDaysInMonth() {
+		return date('t', mktime(0, 0, 0, $this->month, 1, $this->year));
 	}
 
 	/**
@@ -83,8 +84,8 @@ class Calendar extends Page {
 	 *
 	 * @return integer
 	 */
-	protected static function getFirstDay() {
-		return date('w', mktime(0, 0, 0, self::$month, 1, self::$year));
+	protected function getFirstDay() {
+		return date('w', mktime(0, 0, 0, $this->month, 1, $this->year));
 	}
 
 	/**
@@ -92,7 +93,7 @@ class Calendar extends Page {
 	 *
 	 * @return integer
 	 */
-	protected static function getActiveDayCells() {
+	protected function getActiveDayCells() {
 		return self::getFirstDay() + self::getDaysInMonth();
 	}
 
@@ -101,7 +102,7 @@ class Calendar extends Page {
 	 *
 	 * @return integer
 	 */
-	protected static function getWeeksInMonth() {
+	protected function getWeeksInMonth() {
 		return ceil( self::getActiveDayCells() / 7);
 	}
 
@@ -110,36 +111,38 @@ class Calendar extends Page {
 	 *
 	 * @return integer
 	 */
-	protected static function getMonthName() {
-		return date('F', mktime(0, 0, 0, self::$month, 1, self::$year)) . ' ' . self::$year;
+	protected function getMonthName() {
+		return date('F', mktime(0, 0, 0,
+			$this->month, 1, $this->year)) . ' ' . $this->year;
 	}
 	
-	protected static function getMonthEvents() {
+	/**
+	 * Get all events for the month
+	 *
+	 * @param Date
+	 * @return void
+	 */
+	protected function getAllEvents() {
+		$first_day = new DateTime(date(
+			$this->year . '-' . 
+			$this->month . '-1'
+		));
+		$last_day =  new DateTime(date(
+			$this->year . '-' .
+			$this->month . '-' .
+			date('t', strtotime($first_day->format('Y-n-j')))
+		));
+		$this->events = DataObject::get(
+			'Event',
+			'EventDate BETWEEN \'' . 
+				$first_day->format('Y-m-d') . '\' AND \'' .
+				$last_day->format('Y-m-d') . '\''
+		);
 	}
 
-}
-// @todo Move calendar init into the controller
-
-
-class Calendar_Controller extends Page_Controller {
-
-	public function init() {
-		parent::init();
-
-		Requirements::css('calendar/css/calendar.css');
-		$this->calInit();
-		// @todo Move model init call into controller's init(), pass request date (month) as argument
-		// @todo Have all event for the particular month available in here
-	}
-
-	function CurrentMonth() {
-		return $this->getMonthName();
-	}
-
-	function Weeks() {
+	public function Weeks() {
 		$weekSet = new DataObjectSet();
 		foreach (range(0, $this->getWeeksInMonth() - 1) as $weekIndex) {
-
 			$weekSet->push(new ArrayData(
 				array(
 					'Week' => $weekIndex,
@@ -150,28 +153,27 @@ class Calendar_Controller extends Page_Controller {
 		return $weekSet;
 	}
 
-	function Days($weekIndex) {
+	public function Days($weekIndex) {
 		$daysSet = new DataObjectSet();
 
 		for ($i = 1; $i <= 7; $i++) {
 			// starting cell offset
-			$dayIndex = $i + $weekIndex * 7 - $this->getFirstDay();
+			$day = $i + $weekIndex * 7 - $this->getFirstDay();
 			// exclude not valid day indexes
-			if (($dayIndex < 1) || ($dayIndex > $this->getDaysInMonth()))
-				$dayValue = '';
+			if (($day < 1) || ($day > $this->getDaysInMonth()))
+				$day_num = '';
 			else
-				$dayValue = $dayIndex;
+				$day_num = $day;
 			// custom EvenOdd()
-			if ($dayIndex % 2)
+			if ($day % 2)
 				$oddEven = 'odd';
 			else
 				$oddEven = 'even';
-
 			$daysSet->push(new ArrayData(
 				array(
-					'Day' => $dayValue,
+					'Day' => $day_num,
 					'OddEven' => $oddEven,
-					'Events' => $this->Events($dayIndex)
+					'Events' => $this->Events($day)
 					) // not good idea to get events individually one by one
 				)
 			);
@@ -179,15 +181,47 @@ class Calendar_Controller extends Page_Controller {
 		return $daysSet;
 	}
 
-	function Events($dayIndex) {
-		// @todo Store all event for month somewhere - init()?
-		//  Push event for the particular day only
-		//$eventSet->push(new ArrayData(
-		//	array(
-		//		'Event' => 'Event info'
-		//	)
-		//));
-		return '';//DataObject::get('Events', "Date = '$dayIndex'");
+	public function Events($day) {
+		$eventSet = new DataObjectSet();
+		
+		if ($day <= $this->getDaysInMonth()) {
+			$date = new DateTime(date(
+				$this->year . '-' . 
+				$this->month . '-' . $day
+			));
+			if ($this->events) {
+				foreach ($this->events as $event) {
+					if ($event->EventDate == $date->format('Y-m-d')) {
+						$eventSet->push(new ArrayData(
+							array(
+								'Event' => $event->EventName
+							)
+						));
+					}
+				}
+			}
+		}
+		return $eventSet;
+	}
+
+}
+
+class Calendar_Controller extends Page_Controller {
+
+	public function init() {
+		parent::init();
+		Requirements::css('calendar/css/calendar.css');
+		
+		$_SESSION['month'] = (isset($_SESSION['month'])) ? $_SESSION['month'] : 0;
+		if(!isset($_GET['month']) || !is_numeric($_GET['month']))
+			$_GET['month'] = 0;
+		$_SESSION['month'] += $_GET['month'];
+		
+		$this->calendarInit($_SESSION['month']);
+	}
+
+	public function CurrentMonth() {
+		return $this->getMonthName();
 	}
 
 }
