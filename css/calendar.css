@@ -1,5 +1,8 @@
-.typography .calendar {
+.typography table.calendar {
 	width: 100%;
+	border-collapse: separate;
+	table-layout: fixed;
+	border-spacing: 1px;
 }
 
 .typography .calendar th {
@@ -13,7 +16,6 @@
 }
 
 .typography .calendar td {
-	border:0 none;
 	color: #a9aaac;
 	width: 14%;
 	height:8em;
@@ -23,6 +25,7 @@
 	text-align: right;
 	font-weight: 300;
 	font-size: .95em;
+	border:0 none;
 }
 
 .typography .calendar td.odd {

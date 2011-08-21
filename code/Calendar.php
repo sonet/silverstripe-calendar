@@ -4,8 +4,8 @@
  * Calendar Page type with month view with event management in the CMS
  * 
  * @todo Navigation to be added
- * @todo Event management in CMS
- * @todo Events rendering
+ * @todo Modify events class to DataObjectDecorator/loosely coupled
+ * @todo Modify template files to work with the default theme
  *
  * @package calendar
  */
@@ -15,7 +15,6 @@ class Calendar extends Page {
 	protected $year;
 	protected $month;
 	protected $day;
-	
 	/**
 	 * @var DataObjectSet storing all events for the month
 	 */
@@ -174,7 +173,7 @@ class Calendar extends Page {
 					'Day' => $day_num,
 					'OddEven' => $oddEven,
 					'Events' => $this->Events($day)
-					) // not good idea to get events individually one by one
+					)
 				)
 			);
 		}
@@ -183,8 +182,7 @@ class Calendar extends Page {
 
 	public function Events($day) {
 		$eventSet = new DataObjectSet();
-		
-		if ($day <= $this->getDaysInMonth()) {
+		if ($day <= $this->getDaysInMonth() && $day > 0) {
 			$date = new DateTime(date(
 				$this->year . '-' . 
 				$this->month . '-' . $day
@@ -211,17 +209,13 @@ class Calendar_Controller extends Page_Controller {
 	public function init() {
 		parent::init();
 		Requirements::css('calendar/css/calendar.css');
-		
+
 		$_SESSION['month'] = (isset($_SESSION['month'])) ? $_SESSION['month'] : 0;
 		if(!isset($_GET['month']) || !is_numeric($_GET['month']))
 			$_GET['month'] = 0;
-		$_SESSION['month'] += $_GET['month'];
-		
-		$this->calendarInit($_SESSION['month']);
-	}
+		$_SESSION['month'] = ($_GET['month'] == 0) ? 0 : $_SESSION['month'] + $_GET['month'];
 
-	public function CurrentMonth() {
-		return $this->getMonthName();
+		$this->calendarInit($_SESSION['month']);
 	}
 
 }

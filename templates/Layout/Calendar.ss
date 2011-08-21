@@ -10,9 +10,10 @@
 				</div>
 <% include TitleBackground %>
 				$Content
+				<p class="right"><a href="$Link?month=-1">Previous</a> | <a href="$Link?month=1">Next</a> | <a href="$Link?month=0">Current</a></p>
 				<table class="calendar">
 					<tr>
-						<th colspan="7">$CurrentMonth</th>
+						<th colspan="7">$MonthName</th>
 					</tr>
 					<tr>
 						<th>Sun</th>
