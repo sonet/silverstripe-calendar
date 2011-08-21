@@ -23,21 +23,13 @@
 						<th>Fri</th>
 						<th>Sat</th>
 					</tr>
-					<tr>
-						<% control Weeks %>
-						<tr>
-							<% control Days %> 
-							<td class="$OddEven">
-								$Day
-								<% control Events %>
-								<div class="event">$Event</div>
-								<% end_control %>
-								
-							</td>
-							<% end_control %> 
-						</tr>
-						<% end_control %>
+					<% control Weeks %><tr>
+						<% control Days %><td class="$OddEven">$Day
+							<% control Events %><div class="event">$Event</div><% end_control %>
+						</td>
+						<% end_control %> 
 					</tr>
+					<% end_control %>
 				</table>
 			</div>
 		</div>
